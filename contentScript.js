@@ -13,15 +13,6 @@
     });
   };
 
-  /* Clear out all previous bookmarks */
-  const deleteOldBookmarks = () => {
-    // remove bookmarks from previous video
-    const oldBookmarks = document.getElementsByClassName("bookmark");
-    while (oldBookmarks[0]) {
-      oldBookmarks[0].parentNode.removeChild(oldBookmarks[0]);
-    }
-  };
-
   /* get current video's duration */
   const getVideoDuration = () => {
     if (ytPlayer) return parseInt(ytPlayer.duration);
@@ -41,7 +32,7 @@
 
       fetchBookmarks().then((obj) => {
         bookmarksList = obj;
-        newBookmarksList = bookmarksList.concat(newBookmark);
+        let newBookmarksList = bookmarksList.concat(newBookmark);
         newBookmarksList = newBookmarksList.sort((a, b) => a.time - b.time);
         chrome.storage.sync.set({
           [currentVideo]: JSON.stringify(newBookmarksList),
@@ -52,7 +43,6 @@
 
   /* this checks for whenever a new video is loaded or the current tab is reloaded */
   const newVideoLoaded = (refreshed) => {
-    deleteOldBookmarks();
     bookmarksList = [];
     ytLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
     ytPlayer = document.getElementsByClassName("html5-main-video")[0];
@@ -108,7 +98,6 @@
       bookmarksList &&
       bookmarksList.length > 0
     ) {
-      deleteOldBookmarks();
       bookmarksList = bookmarksList.filter((b) => b.time != obj.value);
     }
 
