@@ -87,9 +87,7 @@ const onEdit = (e) => {
         saveEditedBookmarkTitle(bookmarkElement, bookmarkTitle, editTitleBtn);
     });
 
-    setTimeout(() => {
-      titleTextBox.select();
-    });
+    titleTextBox.select();
 
     // set editing attribute
     editTitleBtn.setAttribute("data-editing", true);
