@@ -101,19 +101,17 @@ const onEdit = (e) => {
   }
 };
 
-const onPlay = (e) => {
+const onPlay = async (e) => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
+  const activeTab = await getActiveTabURL();
 
-  chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-    const activeTab = tabs[0];
-    chrome.tabs.sendMessage(activeTab.id, {
-      type: "PLAY",
-      value: bookmarkTime,
-    });
+  chrome.tabs.sendMessage(activeTab.id, {
+    type: "PLAY",
+    value: bookmarkTime,
   });
 };
 
-const onDelete = (e) => {
+const onDelete = async (e) => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
 
   // deleting a bookmark from popup
@@ -123,12 +121,10 @@ const onDelete = (e) => {
   bookmarkEleToDelete.parentNode.removeChild(bookmarkEleToDelete);
 
   // send message to delete bookmark
-  chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-    const activeTab = tabs[0];
-    chrome.tabs.sendMessage(activeTab.id, {
-      type: "DELETE",
-      value: bookmarkTime,
-    });
+  const activeTab = await getActiveTabURL();
+  chrome.tabs.sendMessage(activeTab.id, {
+    type: "DELETE",
+    value: bookmarkTime,
   });
 
   // saving it to local chrome storage
@@ -136,21 +132,35 @@ const onDelete = (e) => {
   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-    const activeTab = tabs[0];
-    const query_parameters = activeTab.url.split("?")[1];
-    const url_parameters = new URLSearchParams(query_parameters);
-    currentVideo = url_parameters.get("v");
+document.addEventListener("DOMContentLoaded", async () => {
+  try{
+    const tab = await getActiveTabURL();
+    const queryParameters = tab.url.split("?")[1];
+    const urlParameters = new URLSearchParams(queryParameters);
 
-    if (activeTab.url.indexOf("youtube.com") > -1 && currentVideo) {
+    currentVideo = urlParameters.get("v");
+
+    if (tab.url.indexOf("youtube.com") > -1 && currentVideo) {
       chrome.storage.sync.get([currentVideo], (data) => {
         current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+
         viewBookmarks(current);
       });
     } else {
       const container = document.getElementsByClassName("container")[0];
       container.innerHTML = '<i class="row">No bookmarks to show</i>';
     }
-  });
+  } catch(e) {
+    console.log("This is not a youtube page.")
+  }
 });
+
+async function getActiveTabURL() {
+  const tabs = await chrome.tabs.query({
+      currentWindow: true,
+      active: true
+  });
+
+  return tabs[0];
+}
+
