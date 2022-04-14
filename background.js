@@ -2,7 +2,6 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (
     tab.url.indexOf("youtube.com") != -1 &&
-    changeInfo.status == "complete" &&
     tab.status == "complete"
   ) {
     const query_parameters = tab.url.split("?")[1];
