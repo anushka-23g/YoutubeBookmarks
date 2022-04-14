@@ -1,13 +1,15 @@
+import { getActiveTabURL } from "./utils.js";
+
 let currentVideo;
 let current = [];
 
-const setBookmarkAttributes = (src, eventlistener, controls) => {
+const setBookmarkAttributes = (src, eventlistener, controlParentElement) => {
   const controlElement = document.createElement("img");
 
   controlElement.src = "assets/" + src + ".png";
   controlElement.title = src;
   controlElement.addEventListener("click", eventlistener);
-  controls.appendChild(controlElement);
+  controlParentElement.appendChild(controlElement);
 
   return controlElement;
 };
@@ -31,7 +33,7 @@ const addNewBookmark = (bookmarks, bookmark) => {
   newBookmarkElement.className = "bookmark";
   newBookmarkElement.setAttribute("timestamp", bookmark.time);
 
-  newBookmarkElement.appendChild(bookmarkTitle);
+  newBookmarkElement.appendChild(bookmarkTitleElement);
   newBookmarkElement.appendChild(controlsElement);
   bookmarks.appendChild(newBookmarkElement);
 };
@@ -52,6 +54,7 @@ const viewBookmarks = (currentBookmarks=[]) => {
 
 const saveEditedBookmarkTitle = (bookmarkEle, bookmarkTitle, editTitleBtn) => {
   const newBookmarkTitle = bookmarkTitle.getElementsByTagName("input")[0].value;
+
   editTitleBtn.setAttribute("data-editing", false);
   editTitleBtn.src = "assets/edit.png";
   bookmarkTitle.innerHTML = newBookmarkTitle;
@@ -132,14 +135,15 @@ const onDelete = async (e) => {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const activeTab = await getActiveTabURL();
+
   try{
-    const tab = await getActiveTabURL();
-    const queryParameters = tab.url.split("?")[1];
+    const queryParameters = activeTab.url.split("?")[1];
     const urlParameters = new URLSearchParams(queryParameters);
 
     currentVideo = urlParameters.get("v");
 
-    if (tab.url.indexOf("youtube.com") > -1 && currentVideo) {
+    if (activeTab.url.indexOf("youtube.com") > -1 && currentVideo) {
       chrome.storage.sync.get([currentVideo], (data) => {
         current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
 
@@ -154,11 +158,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-async function getActiveTabURL() {
-  const tabs = await chrome.tabs.query({
-      currentWindow: true,
-      active: true
-  });
-
-  return tabs[0];
-}
