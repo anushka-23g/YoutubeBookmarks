@@ -1,4 +1,4 @@
-import { getActiveTabURL } from "./utils.js";
+import { getActiveTabURL, sendMessage } from "./utils.js";
 
 let currentVideo;
 let current = [];
@@ -52,54 +52,51 @@ const viewBookmarks = (currentBookmarks=[]) => {
   }
 };
 
-const saveEditedBookmarkTitle = (bookmarkEle, bookmarkTitle, editTitleBtn) => {
+const saveEditedBookmarkTitle = (bookmarkElement, bookmarkTitle, editTitleBtn) => {
   const newBookmarkTitle = bookmarkTitle.getElementsByTagName("input")[0].value;
+  const editedBookmarkTime = bookmarkElement.getAttribute("timestamp");
+  const editedBookmark = current.filter((b) => b.time == editedBookmarkTime)[0];
 
   editTitleBtn.setAttribute("data-editing", false);
   editTitleBtn.src = "assets/edit.png";
   bookmarkTitle.innerHTML = newBookmarkTitle;
 
-  const editedBookmarkTime = bookmarkEle.getAttribute("timestamp");
-  const editedBookmark = current.filter((b) => b.time == editedBookmarkTime)[0];
   editedBookmark.desc = newBookmarkTitle;
   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
 };
 
 const onEdit = (e) => {
   const editTitleBtn = e.target;
-  const bookmarkEle = editTitleBtn.parentNode.parentNode;
-  const bookmarkTitle = bookmarkEle.getElementsByClassName("bookmark-title")[0];
+  const bookmarkElement = editTitleBtn.parentNode.parentNode;
+  const bookmarkTitle = bookmarkElement.getElementsByClassName("bookmark-title")[0];
   const editingAttr = editTitleBtn.getAttribute("data-editing");
-  // first time it does not exist and after one edit it becomes false
-  const isEditing = !editingAttr || editingAttr == "false";
+  const isEditing = !editingAttr;
 
-  if (bookmarkTitle) {
-    if (isEditing) {
-      const bookmarkTitleText = bookmarkTitle.innerHTML;
-      bookmarkTitle.innerHTML = "";
-      editTitleBtn.src = "assets/save.png";
+  if (isEditing && bookmarkTitle) {
+    const bookmarkTitleText = bookmarkTitle.innerHTML;
+    const titleTextBox = document.createElement("input");
 
-      const titleTextBox = document.createElement("input");
-      titleTextBox.className = "textbox";
-      titleTextBox.value = bookmarkTitleText;
-      titleTextBox.addEventListener("keypress", (e) => {
-        //checking if enter/return key is pressed
-        e.key === "Enter" &&
-          saveEditedBookmarkTitle(bookmarkEle, bookmarkTitle, editTitleBtn);
-      });
+    bookmarkTitle.innerHTML = "";
+    editTitleBtn.src = "assets/save.png";
 
-      setTimeout(() => {
-        titleTextBox.select();
-      }); // select textbox text
+    titleTextBox.className = "textbox";
+    titleTextBox.value = bookmarkTitleText;
 
-      // set editing attribute
-      editTitleBtn.setAttribute("data-editing", true);
+    titleTextBox.addEventListener("keypress", (e) => {
+      e.key === "Enter" &&
+        saveEditedBookmarkTitle(bookmarkElement, bookmarkTitle, editTitleBtn);
+    });
 
-      bookmarkTitle.appendChild(titleTextBox);
-    } else {
-      // saving
-      saveEditedBookmarkTitle(bookmarkEle, bookmarkTitle, editTitleBtn);
-    }
+    setTimeout(() => {
+      titleTextBox.select();
+    });
+
+    // set editing attribute
+    editTitleBtn.setAttribute("data-editing", true);
+
+    bookmarkTitle.appendChild(titleTextBox);
+  } else {
+    saveEditedBookmarkTitle(bookmarkElement, bookmarkTitle, editTitleBtn);
   }
 };
 
@@ -107,27 +104,22 @@ const onPlay = async (e) => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
-  chrome.tabs.sendMessage(activeTab.id, {
-    type: "PLAY",
-    value: bookmarkTime,
-  });
+  sendMessage(activeTab.id, "PLAY", bookmarkTime);
 };
 
 const onDelete = async (e) => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
 
   // deleting a bookmark from popup
-  const bookmarkEleToDelete = document.getElementById(
+  const bookmarkElementToDelete = document.getElementById(
     "bookmark-" + bookmarkTime
   );
-  bookmarkEleToDelete.parentNode.removeChild(bookmarkEleToDelete);
+  bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 
   // send message to delete bookmark
   const activeTab = await getActiveTabURL();
-  chrome.tabs.sendMessage(activeTab.id, {
-    type: "DELETE",
-    value: bookmarkTime,
-  });
+
+  sendMessage(activeTab.id, "DELETE", bookmarkTime);
 
   // saving it to local chrome storage
   current = current.filter((b) => b.time != bookmarkTime);
