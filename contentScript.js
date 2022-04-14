@@ -4,7 +4,7 @@
   let lastVideo = null; // id of the last handled video
   let bookmarksList = []; // list of the video bookmarks
 
-  /* Fetch all bookmarks for current video */
+ //gettinh bookmarks from chrome local storage
   const fetchBookmarks = () => {
     return new Promise((resolve) => {
       chrome.storage.sync.get([currentVideo], (obj) => {
