@@ -2,52 +2,51 @@ let currentVideo;
 let current = [];
 
 const setBookmarkAttributes = (src, eventlistener, controls) => {
-  const obj = document.createElement("img");
-  obj.src = "assets/" + src + ".png";
-  obj.title = src;
-  obj.addEventListener("click", eventlistener);
-  controls.appendChild(obj);
-  return obj;
+  const controlElement = document.createElement("img");
+
+  controlElement.src = "assets/" + src + ".png";
+  controlElement.title = src;
+  controlElement.addEventListener("click", eventlistener);
+  controls.appendChild(controlElement);
+
+  return controlElement;
 };
 
 // adding a new bookmark row to the popup
 const addNewBookmark = (bookmarks, bookmark) => {
   // bookmark title element
-  const bookmarkTitle = document.createElement("div");
-  bookmarkTitle.textContent = bookmark.desc;
-  bookmarkTitle.className = "bookmark-title";
+  const bookmarkTitleElement = document.createElement("div");
+  const controlsElement = document.createElement("div");
+  const newBookmarkElement = document.createElement("div");
 
-  // bookmark controls - edit bookmark title, play from bookmark
-  const controls = document.createElement("div");
-  controls.className = "bookmark-controls";
+  bookmarkTitleElement.textContent = bookmark.desc;
+  bookmarkTitleElement.className = "bookmark-title";
+  controlsElement.className = "bookmark-controls";
 
-  const editTitle = setBookmarkAttributes("edit", onEdit, controls);
-  const playBookmark = setBookmarkAttributes("play", onPlay, controls);
-  const removeBookmark = setBookmarkAttributes("delete", onDelete, controls);
+  setBookmarkAttributes("edit", onEdit, controlsElement);
+  setBookmarkAttributes("play", onPlay, controlsElement);
+  setBookmarkAttributes("delete", onDelete, controlsElement);
 
-  const newBookmarkObj = document.createElement("div");
-  newBookmarkObj.id = "bookmark-" + bookmark.time;
-  newBookmarkObj.className = "bookmark";
-  newBookmarkObj.setAttribute("timestamp", bookmark.time);
+  newBookmarkElement.id = "bookmark-" + bookmark.time;
+  newBookmarkElement.className = "bookmark";
+  newBookmarkElement.setAttribute("timestamp", bookmark.time);
 
-  newBookmarkObj.appendChild(bookmarkTitle);
-  newBookmarkObj.appendChild(controls);
-  bookmarks.appendChild(newBookmarkObj);
+  newBookmarkElement.appendChild(bookmarkTitle);
+  newBookmarkElement.appendChild(controlsElement);
+  bookmarks.appendChild(newBookmarkElement);
 };
 
-const viewBookmarks = (bookmarksList) => {
-  const bookmarks = document.getElementById("bookmarks");
-  bookmarks.innerHTML = ""; // removes anything in the previous list
+const viewBookmarks = (currentBookmarks=[]) => {
+  const bookmarksElement = document.getElementById("bookmarks");
+  bookmarksElement.innerHTML = ""; // removes anything in the previous list
 
-  if (bookmarksList && bookmarksList.length > 0) {
-    //array
-
-    for (let i = 0; i < bookmarksList.length; i++) {
-      const bookmark = bookmarksList[i];
-      addNewBookmark(bookmarks, bookmark);
+  if (currentBookmarks) {
+    for (let i = 0; i < currentBookmarks.length; i++) {
+      const bookmark = currentBookmarks[i];
+      addNewBookmark(bookmarksElement, bookmark);
     }
   } else {
-    bookmarks.innerHTML = '<i class="row">No bookmarks to show</i>';
+    bookmarksElement.innerHTML = '<i class="row">No bookmarks to show</i>';
   }
 };
 
@@ -163,4 +162,3 @@ async function getActiveTabURL() {
 
   return tabs[0];
 }
-
