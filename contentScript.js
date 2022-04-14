@@ -19,7 +19,7 @@
     return null;
   };
 
-  
+   /* adding new bookmark to the chrome local storage */
   const addNewBookmarkEventHandler = () => {
     let currentTime = null;
     if (ytPlayer) currentTime = parseInt(ytPlayer.currentTime);
