@@ -1,8 +1,8 @@
 (() => {
   let ytLeftControls, ytPlayer;
-  let currentVideo = null; // id of the currently playing video
-  let lastVideo = null; // id of the last handled video
-  let bookmarksList = []; // list of the video bookmarks
+  let currentVideo = "";
+  let lastVideo = "";
+  let currentVideoBookmarks = [];
 
  /* getting bookmarks from chrome local storage */
   const fetchBookmarks = () => {
@@ -31,8 +31,8 @@
       };
 
       fetchBookmarks().then((obj) => {
-        bookmarksList = obj;
-        let newBookmarksList = bookmarksList.concat(newBookmark);
+        currentVideoBookmarks = obj;
+        let newBookmarksList = currentVideoBookmarks.concat(newBookmark);
         newBookmarksList = newBookmarksList.sort((a, b) => a.time - b.time);
         chrome.storage.sync.set({
           [currentVideo]: JSON.stringify(newBookmarksList),
@@ -43,7 +43,7 @@
 
   /* this checks for whenever a new video is loaded or the current tab is reloaded */
   const newVideoLoaded = (refreshed) => {
-    bookmarksList = [];
+    currentVideoBookmarks = [];
     ytLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
     ytPlayer = document.getElementsByClassName("html5-main-video")[0];
 
@@ -64,7 +64,7 @@
 
     Promise.all([fetchBookmarksPromise, videoBookmarkTimePromise]).then(
       (obj) => {
-        bookmarksList = obj[0];
+        currentVideoBookmarks = obj[0];
 
         // Adding bookmark button
         let bookmarkBtn = document.getElementsByClassName("bookmark-btn")[0];
@@ -87,18 +87,16 @@
   };
 
   /* respond to messages from background or popup pages */
-  chrome.runtime.onMessage.addListener((obj, sender, sendResponse) => {
-    if (obj.type === "NEW" && obj.videoId && lastVideo !== obj.videoId) {
-      currentVideo = obj.videoId;
+  chrome.runtime.onMessage.addListener((obj, sendResponse) => {
+    const { type, value, videoId } = obj;
+
+    if (type === "NEW") {
+      currentVideo = videoId;
       newVideoLoaded(false);
-    } else if (obj.type === "PLAY" && ytPlayer) {
-      ytPlayer.currentTime = obj.value;
-    } else if (
-      obj.type === "DELETE" &&
-      bookmarksList &&
-      bookmarksList.length > 0
-    ) {
-      bookmarksList = bookmarksList.filter((b) => b.time != obj.value);
+    } else if (type === "PLAY") {
+      ytPlayer.currentTime = value;
+    } else if ( type === "DELETE") {
+      currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time != value);
     }
 
     sendResponse({});

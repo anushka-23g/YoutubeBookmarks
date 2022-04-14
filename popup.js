@@ -1,22 +1,9 @@
-import { getActiveTabURL, sendMessage } from "./utils.js";
+import { getActiveTabURL, sendMessage, setBookmarkAttributes } from "./utils.js";
 
 let currentVideo;
 let current = [];
 
-const setBookmarkAttributes = (src, eventlistener, controlParentElement) => {
-  const controlElement = document.createElement("img");
-
-  controlElement.src = "assets/" + src + ".png";
-  controlElement.title = src;
-  controlElement.addEventListener("click", eventlistener);
-  controlParentElement.appendChild(controlElement);
-
-  return controlElement;
-};
-
-// adding a new bookmark row to the popup
 const addNewBookmark = (bookmarks, bookmark) => {
-  // bookmark title element
   const bookmarkTitleElement = document.createElement("div");
   const controlsElement = document.createElement("div");
   const newBookmarkElement = document.createElement("div");
@@ -40,7 +27,7 @@ const addNewBookmark = (bookmarks, bookmark) => {
 
 const viewBookmarks = (currentBookmarks=[]) => {
   const bookmarksElement = document.getElementById("bookmarks");
-  bookmarksElement.innerHTML = ""; // removes anything in the previous list
+  bookmarksElement.innerHTML = "";
 
   if (currentBookmarks) {
     for (let i = 0; i < currentBookmarks.length; i++) {
@@ -102,24 +89,20 @@ const onPlay = async (e) => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
-  sendMessage(activeTab.id, "PLAY", bookmarkTime);
+  sendMessage({ tabId: activeTab.id, type: "PLAY", value: bookmarkTime });
 };
 
 const onDelete = async (e) => {
+  const activeTab = await getActiveTabURL();
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
-
-  // deleting a bookmark from popup
   const bookmarkElementToDelete = document.getElementById(
     "bookmark-" + bookmarkTime
   );
+
   bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 
-  // send message to delete bookmark
-  const activeTab = await getActiveTabURL();
+  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime });
 
-  sendMessage(activeTab.id, "DELETE", bookmarkTime);
-
-  // saving it to local chrome storage
   current = current.filter((b) => b.time != bookmarkTime);
   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
 };
@@ -133,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     currentVideo = urlParameters.get("v");
 
-    if (activeTab.url.indexOf("youtube.com") > -1 && currentVideo) {
+    if (activeTab.url.includes("youtube.com") && currentVideo) {
       chrome.storage.sync.get([currentVideo], (data) => {
         current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
 
@@ -141,6 +124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     } else {
       const container = document.getElementsByClassName("container")[0];
+
       container.innerHTML = '<i class="row">No bookmarks to show</i>';
     }
   } catch(e) {
