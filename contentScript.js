@@ -4,7 +4,7 @@
   let lastVideo = null; // id of the last handled video
   let bookmarksList = []; // list of the video bookmarks
 
- //getting bookmarks from chrome local storage
+ /* getting bookmarks from chrome local storage */
   const fetchBookmarks = () => {
     return new Promise((resolve) => {
       chrome.storage.sync.get([currentVideo], (obj) => {
@@ -13,7 +13,7 @@
     });
   };
 
-  /* get current video's duration */
+  /* getting this video's length */
   const getVideoDuration = () => {
     if (ytPlayer) return parseInt(ytPlayer.duration);
     return null;
