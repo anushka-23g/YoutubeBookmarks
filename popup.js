@@ -131,7 +131,7 @@ const onDelete = (e) => {
     });
   });
 
-  // save
+  // saving it to local chrome storage
   current = current.filter((b) => b.time != bookmarkTime);
   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
 };
