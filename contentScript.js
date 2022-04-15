@@ -41,41 +41,21 @@
   };
 
   /* this checks for whenever a new video is loaded or the current tab is reloaded */
-  const newVideoLoaded = (refreshed) => {
-    currentVideoBookmarks = [];
+  const newVideoLoaded = async () => {
+    const bookmarks = await fetchBookmarks();
+    const bookmarkBtn = document.createElement("img");
+
     youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-    youtubePlayer = document.getElementsByClassName("html5-main-video")[0];
+    youtubePlayer = document.getElementById("movie_player");
+    currentVideoBookmarks = bookmarks;
 
-    const fetchBookmarksPromise = fetchBookmarks();
+    bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
+    bookmarkBtn.className = "ytp-button " + "bookmark-btn";
+    bookmarkBtn.title = "Click to bookmark current timestamp";
 
-    const videoBookmarkTimePromise = new Promise((resolve) => {
-      const getCurrentTime = () => {
-        youtubePlayer.removeEventListener("playing", getCurrentTime);
-        resolve(getVideoDuration());
-      };
+    youtubeLeftControls.appendChild(bookmarkBtn);
 
-      if (refreshed) {
-        resolve(getVideoDuration());
-        return;
-      }
-      youtubePlayer.addEventListener("playing", getCurrentTime);
-    });
-
-    Promise.all([fetchBookmarksPromise, videoBookmarkTimePromise]).then(
-      (obj) => {
-        const bookmarkBtn = document.createElement("img");
-
-        currentVideoBookmarks = obj[0];
-
-        bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
-        bookmarkBtn.className = "ytp-button " + "bookmark-btn";
-        bookmarkBtn.title = "Click to bookmark current timestamp";
-
-        youtubeLeftControls.appendChild(bookmarkBtn);
-
-        bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
-      }
-    );
+    bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
   };
 
   /* respond to messages from background or popup pages */

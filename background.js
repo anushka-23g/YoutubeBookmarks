@@ -1,5 +1,5 @@
 chrome.tabs.onUpdated.addListener((tabId, tab) => {
-  if (tab.url.includes("youtube.com")) {
+  if (tab.url && tab.url.includes("youtube.com")) {
     const queryParameters = tab.url.split("?")[1];
     const urlParameters = new URLSearchParams(queryParameters);
 
