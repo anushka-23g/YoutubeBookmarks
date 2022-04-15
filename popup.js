@@ -1,4 +1,4 @@
-import { getActiveTabURL, sendMessage, setBookmarkAttributes } from "./utils.js";
+import { getActiveTabURL, sendMessage } from "./utils.js";
 
 let currentVideo;
 let current = [];
@@ -12,7 +12,6 @@ const addNewBookmark = (bookmarks, bookmark) => {
   bookmarkTitleElement.className = "bookmark-title";
   controlsElement.className = "bookmark-controls";
 
-  setBookmarkAttributes("edit", onEdit, controlsElement);
   setBookmarkAttributes("play", onPlay, controlsElement);
   setBookmarkAttributes("delete", onDelete, controlsElement);
 
@@ -39,52 +38,6 @@ const viewBookmarks = (currentBookmarks=[]) => {
   }
 };
 
-const saveEditedBookmarkTitle = (bookmarkElement, bookmarkTitle, editTitleBtn) => {
-  const newBookmarkTitle = bookmarkTitle.getElementsByTagName("input")[0].value;
-  const editedBookmarkTime = bookmarkElement.getAttribute("timestamp");
-  const editedBookmark = current.filter((b) => b.time == editedBookmarkTime)[0];
-
-  editTitleBtn.setAttribute("data-editing", false);
-  editTitleBtn.src = "assets/edit.png";
-  bookmarkTitle.innerHTML = newBookmarkTitle;
-
-  editedBookmark.desc = newBookmarkTitle;
-  chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
-};
-
-const onEdit = (e) => {
-  const editTitleBtn = e.target;
-  const bookmarkElement = editTitleBtn.parentNode.parentNode;
-  const bookmarkTitle = bookmarkElement.getElementsByClassName("bookmark-title")[0];
-  const editingAttr = editTitleBtn.getAttribute("data-editing");
-  const isEditing = !editingAttr;
-
-  if (isEditing && bookmarkTitle) {
-    const bookmarkTitleText = bookmarkTitle.innerHTML;
-    const titleTextBox = document.createElement("input");
-
-    bookmarkTitle.innerHTML = "";
-    editTitleBtn.src = "assets/save.png";
-
-    titleTextBox.className = "textbox";
-    titleTextBox.value = bookmarkTitleText;
-
-    titleTextBox.addEventListener("keypress", (e) => {
-      e.key === "Enter" &&
-        saveEditedBookmarkTitle(bookmarkElement, bookmarkTitle, editTitleBtn);
-    });
-
-    titleTextBox.select();
-
-    // set editing attribute
-    editTitleBtn.setAttribute("data-editing", true);
-
-    bookmarkTitle.appendChild(titleTextBox);
-  } else {
-    saveEditedBookmarkTitle(bookmarkElement, bookmarkTitle, editTitleBtn);
-  }
-};
-
 const onPlay = async (e) => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
@@ -105,6 +58,17 @@ const onDelete = async (e) => {
 
   current = current.filter((b) => b.time != bookmarkTime);
   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
+};
+
+const setBookmarkAttributes =  (src, eventlistener, controlParentElement) => {
+  const controlElement = document.createElement("img");
+
+  controlElement.src = "assets/" + src + ".png";
+  controlElement.title = src;
+  controlElement.addEventListener("click", eventlistener);
+  controlParentElement.appendChild(controlElement);
+
+  return controlElement;
 };
 
 document.addEventListener("DOMContentLoaded", async () => {

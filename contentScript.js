@@ -1,7 +1,6 @@
 (() => {
   let ytLeftControls, ytPlayer;
   let currentVideo = "";
-  let lastVideo = "";
   let currentVideoBookmarks = [];
 
  /* getting bookmarks from chrome local storage */
@@ -82,8 +81,6 @@
         }
       }
     );
-
-    lastVideo = currentVideo;
   };
 
   /* respond to messages from background or popup pages */

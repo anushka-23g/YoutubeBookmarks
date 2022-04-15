@@ -13,14 +13,3 @@ export function sendMessage({tabId, type, value}) {
         value
     });
 }
-
-export function setBookmarkAttributes (src, eventlistener, controlParentElement) {
-    const controlElement = document.createElement("img");
-
-    controlElement.src = "assets/" + src + ".png";
-    controlElement.title = src;
-    controlElement.addEventListener("click", eventlistener);
-    controlParentElement.appendChild(controlElement);
-
-    return controlElement;
-};
