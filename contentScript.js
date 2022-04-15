@@ -3,7 +3,6 @@
   let currentVideo = "";
   let currentVideoBookmarks = [];
 
- /* getting bookmarks from chrome local storage */
   const fetchBookmarks = () => {
     return new Promise((resolve) => {
       chrome.storage.sync.get([currentVideo], (obj) => {
@@ -12,35 +11,21 @@
     });
   };
 
-  /* getting this video's length */
-  const getVideoDuration = () => {
-    if (youtubePlayer) return parseInt(youtubePlayer.duration);
-    return null;
+
+  const addNewBookmarkEventHandler = async () => {
+    const currentTime = parseInt(youtubePlayer.currentTime);
+    const newBookmark = {
+      time: currentTime,
+      desc: "Bookmark at " + getTime(currentTime),
+    };
+
+    currentVideoBookmarks = await fetchBookmarks();
+
+    chrome.storage.sync.set({
+      [currentVideo]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time))
+    });
   };
 
-   /* adding new bookmark to the chrome local storage */
-  const addNewBookmarkEventHandler = () => {
-    let currentTime = null;
-    if (youtubePlayer) currentTime = parseInt(youtubePlayer.currentTime);
-
-    if (currentTime) {
-      const newBookmark = {
-        time: currentTime,
-        desc: "Bookmark at " + getTime(currentTime),
-      };
-
-      fetchBookmarks().then((obj) => {
-        currentVideoBookmarks = obj;
-        let newBookmarksList = currentVideoBookmarks.concat(newBookmark);
-        newBookmarksList = newBookmarksList.sort((a, b) => a.time - b.time);
-        chrome.storage.sync.set({
-          [currentVideo]: JSON.stringify(newBookmarksList),
-        });
-      });
-    }
-  };
-
-  /* this checks for whenever a new video is loaded or the current tab is reloaded */
   const newVideoLoaded = async () => {
     const bookmarks = await fetchBookmarks();
     const bookmarkBtn = document.createElement("img");
@@ -58,7 +43,6 @@
     bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
   };
 
-  /* respond to messages from background or popup pages */
   chrome.runtime.onMessage.addListener((obj, sendResponse) => {
     const { type, value, videoId } = obj;
 
@@ -74,7 +58,6 @@
     sendResponse({});
   });
 
-  /* Getting the query parameter for the current tab url on refreshing the tab*/
   const url_parameters = new URLSearchParams(location.search);
   currentVideo = url_parameters.get("v");
 
