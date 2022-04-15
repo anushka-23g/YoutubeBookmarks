@@ -11,7 +11,6 @@
     });
   };
 
-
   const addNewBookmarkEventHandler = async () => {
     const currentTime = parseInt(youtubePlayer.currentTime);
     const newBookmark = {
@@ -48,7 +47,7 @@
 
     if (type === "NEW") {
       currentVideo = videoId;
-      newVideoLoaded(false);
+      newVideoLoaded();
     } else if (type === "PLAY") {
       youtubePlayer.currentTime = value;
     } else if ( type === "DELETE") {
@@ -57,11 +56,6 @@
 
     sendResponse({});
   });
-
-  const urlParameters = new URLSearchParams(location.search);
-  currentVideo = urlParameters.get("v");
-
-  newVideoLoaded(true);
 })();
 
 const getTime = (t) => {
