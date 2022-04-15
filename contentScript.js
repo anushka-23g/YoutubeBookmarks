@@ -58,8 +58,8 @@
     sendResponse({});
   });
 
-  const url_parameters = new URLSearchParams(location.search);
-  currentVideo = url_parameters.get("v");
+  const urlParameters = new URLSearchParams(location.search);
+  currentVideo = urlParameters.get("v");
 
   newVideoLoaded(true);
 })();
