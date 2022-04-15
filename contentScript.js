@@ -61,17 +61,15 @@
   const url_parameters = new URLSearchParams(location.search);
   currentVideo = url_parameters.get("v");
 
-  if (currentVideo) {
-    newVideoLoaded(true);
-  }
+  newVideoLoaded(true);
 })();
 
 const getTime = (t) => {
   let hour, minute, sec, h1;
 
-  hour = Math.floor(t / 60 / 60);
-  minute = Math.floor((t / 60 / 60 - hour) * 60);
-  sec = Math.floor(((t / 60 / 60 - hour) * 60 - minute) * 60);
+  hour = t / 60 / 60;
+  minute = (t / 60 / 60 - hour) * 60;
+  sec = ((t / 60 / 60 - hour) * 60 - minute) * 60;
 
   sec = sec < 10 ? `0${sec}` : `${sec}`;
   minute = minute < 10 ? `0${minute}` : `${minute}`;
