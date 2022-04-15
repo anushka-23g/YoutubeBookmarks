@@ -63,22 +63,17 @@
 
     Promise.all([fetchBookmarksPromise, videoBookmarkTimePromise]).then(
       (obj) => {
+        const bookmarkBtn = document.createElement("img");
+
         currentVideoBookmarks = obj[0];
 
-        // Adding bookmark button
-        let bookmarkBtn = document.getElementsByClassName("bookmark-btn")[0];
+        bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
+        bookmarkBtn.className = "ytp-button " + "bookmark-btn";
+        bookmarkBtn.title = "Click to bookmark current timestamp";
 
-        if (!bookmarkBtn) {
-          const bookmarkBtn = document.createElement("img");
+        ytLeftControls.appendChild(bookmarkBtn);
 
-          bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
-          bookmarkBtn.className = "ytp-button " + "bookmark-btn";
-          bookmarkBtn.title = "Click to bookmark current timestamp";
-
-          ytLeftControls.appendChild(bookmarkBtn);
-
-          bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
-        }
+        bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
       }
     );
   };
