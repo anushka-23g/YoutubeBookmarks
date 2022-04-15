@@ -1,5 +1,5 @@
 (() => {
-  let ytLeftControls, ytPlayer;
+  let youtubeLeftControls, youtubePlayer;
   let currentVideo = "";
   let currentVideoBookmarks = [];
 
@@ -14,14 +14,14 @@
 
   /* getting this video's length */
   const getVideoDuration = () => {
-    if (ytPlayer) return parseInt(ytPlayer.duration);
+    if (youtubePlayer) return parseInt(youtubePlayer.duration);
     return null;
   };
 
    /* adding new bookmark to the chrome local storage */
   const addNewBookmarkEventHandler = () => {
     let currentTime = null;
-    if (ytPlayer) currentTime = parseInt(ytPlayer.currentTime);
+    if (youtubePlayer) currentTime = parseInt(youtubePlayer.currentTime);
 
     if (currentTime) {
       const newBookmark = {
@@ -43,14 +43,14 @@
   /* this checks for whenever a new video is loaded or the current tab is reloaded */
   const newVideoLoaded = (refreshed) => {
     currentVideoBookmarks = [];
-    ytLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-    ytPlayer = document.getElementsByClassName("html5-main-video")[0];
+    youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
+    youtubePlayer = document.getElementsByClassName("html5-main-video")[0];
 
     const fetchBookmarksPromise = fetchBookmarks();
 
     const videoBookmarkTimePromise = new Promise((resolve) => {
       const getCurrentTime = () => {
-        ytPlayer.removeEventListener("playing", getCurrentTime);
+        youtubePlayer.removeEventListener("playing", getCurrentTime);
         resolve(getVideoDuration());
       };
 
@@ -58,7 +58,7 @@
         resolve(getVideoDuration());
         return;
       }
-      ytPlayer.addEventListener("playing", getCurrentTime);
+      youtubePlayer.addEventListener("playing", getCurrentTime);
     });
 
     Promise.all([fetchBookmarksPromise, videoBookmarkTimePromise]).then(
@@ -71,7 +71,7 @@
         bookmarkBtn.className = "ytp-button " + "bookmark-btn";
         bookmarkBtn.title = "Click to bookmark current timestamp";
 
-        ytLeftControls.appendChild(bookmarkBtn);
+        youtubeLeftControls.appendChild(bookmarkBtn);
 
         bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
       }
@@ -86,7 +86,7 @@
       currentVideo = videoId;
       newVideoLoaded(false);
     } else if (type === "PLAY") {
-      ytPlayer.currentTime = value;
+      youtubePlayer.currentTime = value;
     } else if ( type === "DELETE") {
       currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time != value);
     }
