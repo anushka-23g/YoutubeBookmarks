@@ -12,7 +12,7 @@
   };
 
   const addNewBookmarkEventHandler = async () => {
-    const currentTime = parseInt(youtubePlayer.currentTime);
+    const currentTime = youtubePlayer.currentTime;
     const newBookmark = {
       time: currentTime,
       desc: "Bookmark at " + getTime(currentTime),
@@ -33,7 +33,7 @@
       const bookmarkBtn = document.createElement("img");
 
       youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-      youtubePlayer = document.getElementById("movie_player");
+      youtubePlayer = document.getElementsByClassName('video-stream')[0];
       currentVideoBookmarks = bookmarks;
 
       bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
@@ -63,9 +63,8 @@
 })();
 
 const getTime = t => {
-  const hours = Math.floor(t / 3600);
-  const mins = Math.floor((t % 3600) / 60);
-  const seconds = t % 60;
+  var date = new Date(0);
+  date.setSeconds(t);
 
-  return `${hours}:${mins}:${seconds}`;
+  return date.toISOString().substr(11, 8);
 };
