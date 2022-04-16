@@ -63,5 +63,15 @@
 })();
 
 const getTime = (t) => {
-  new Date(t * 1000).toISOString().substr(11, 8)
+  let hour, minute, sec, h1;
+
+  hour = t / 60 / 60;
+  minute = (t / 60 / 60 - hour) * 60;
+  sec = ((t / 60 / 60 - hour) * 60 - minute) * 60;
+
+  sec = sec < 10 ? `0${sec}` : `${sec}`;
+  minute = minute < 10 ? `0${minute}` : `${minute}`;
+  h1 = hour < 10 ? `0${hour}` : `${hour}`;
+
+  return hour > 0 ? `${h1}:${minute}:${sec}` : `${minute}:${sec}`;
 };
