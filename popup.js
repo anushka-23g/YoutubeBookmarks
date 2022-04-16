@@ -3,6 +3,26 @@ import { getActiveTabURL, sendMessage } from "./utils.js";
 let currentVideo;
 let current = [];
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const activeTab = await getActiveTabURL();
+  const queryParameters = activeTab.url.split("?")[1];
+  const urlParameters = new URLSearchParams(queryParameters);
+
+  currentVideo = urlParameters.get("v");
+
+  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+    chrome.storage.sync.get([currentVideo], (data) => {
+      current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+
+      viewBookmarks(current);
+    });
+  } else {
+    const container = document.getElementsByClassName("container")[0];
+
+    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
+  }
+});
+
 const addNewBookmark = (bookmarks, bookmark) => {
   const bookmarkTitleElement = document.createElement("div");
   const controlsElement = document.createElement("div");
@@ -38,14 +58,14 @@ const viewBookmarks = (currentBookmarks=[]) => {
   }
 };
 
-const onPlay = async (e) => {
+const onPlay = async e => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
   sendMessage({ tabId: activeTab.id, type: "PLAY", value: bookmarkTime });
 };
 
-const onDelete = async (e) => {
+const onDelete = async e => {
   const activeTab = await getActiveTabURL();
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const bookmarkElementToDelete = document.getElementById(
@@ -60,34 +80,13 @@ const onDelete = async (e) => {
   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
 };
 
-const setBookmarkAttributes =  (src, eventlistener, controlParentElement) => {
+const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
   const controlElement = document.createElement("img");
 
   controlElement.src = "assets/" + src + ".png";
   controlElement.title = src;
-  controlElement.addEventListener("click", eventlistener);
+  controlElement.addEventListener("click", eventListener);
   controlParentElement.appendChild(controlElement);
-
-  return controlElement;
 };
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const activeTab = await getActiveTabURL();
-  const queryParameters = activeTab.url.split("?")[1];
-  const urlParameters = new URLSearchParams(queryParameters);
-
-  currentVideo = urlParameters.get("v");
-
-  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
-    chrome.storage.sync.get([currentVideo], (data) => {
-      current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
-
-      viewBookmarks(current);
-    });
-  } else {
-    const container = document.getElementsByClassName("container")[0];
-
-    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
-  }
-});
 

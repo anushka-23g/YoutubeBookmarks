@@ -29,19 +29,19 @@
     const bookmarks = await fetchBookmarks();
     const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
 
+    currentVideoBookmarks = bookmarks;
+
     if (!bookmarkBtnExists) {
       const bookmarkBtn = document.createElement("img");
-
-      youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-      youtubePlayer = document.getElementsByClassName('video-stream')[0];
-      currentVideoBookmarks = bookmarks;
 
       bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
       bookmarkBtn.className = "ytp-button " + "bookmark-btn";
       bookmarkBtn.title = "Click to bookmark current timestamp";
 
-      youtubeLeftControls.appendChild(bookmarkBtn);
+      youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
+      youtubePlayer = document.getElementsByClassName('video-stream')[0];
 
+      youtubeLeftControls.appendChild(bookmarkBtn);
       bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
     }
   };
