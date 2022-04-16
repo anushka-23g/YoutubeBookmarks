@@ -62,16 +62,10 @@
   });
 })();
 
-const getTime = (t) => {
-  let hour, minute, sec, h1;
+const getTime = t => {
+  const hours = Math.floor(t / 3600);
+  const mins = Math.floor((t % 3600) / 60);
+  const seconds = t % 60;
 
-  hour = t / 60 / 60;
-  minute = (t / 60 / 60 - hour) * 60;
-  sec = ((t / 60 / 60 - hour) * 60 - minute) * 60;
-
-  sec = sec < 10 ? `0${sec}` : `${sec}`;
-  minute = minute < 10 ? `0${minute}` : `${minute}`;
-  h1 = hour < 10 ? `0${hour}` : `${hour}`;
-
-  return hour > 0 ? `${h1}:${minute}:${sec}` : `${minute}:${sec}`;
+  return `${hours}:${mins}:${seconds}`;
 };
