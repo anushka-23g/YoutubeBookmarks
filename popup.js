@@ -1,27 +1,7 @@
 import { getActiveTabURL, sendMessage } from "./utils.js";
 
 let currentVideo;
-let current = [];
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const activeTab = await getActiveTabURL();
-  const queryParameters = activeTab.url.split("?")[1];
-  const urlParameters = new URLSearchParams(queryParameters);
-
-  currentVideo = urlParameters.get("v");
-
-  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
-    chrome.storage.sync.get([currentVideo], (data) => {
-      current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
-
-      viewBookmarks(current);
-    });
-  } else {
-    const container = document.getElementsByClassName("container")[0];
-
-    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
-  }
-});
+let currentVideoBookmarks = [];
 
 const addNewBookmark = (bookmarks, bookmark) => {
   const bookmarkTitleElement = document.createElement("div");
@@ -74,10 +54,7 @@ const onDelete = async e => {
 
   bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 
-  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime });
-
-  current = current.filter((b) => b.time != bookmarkTime);
-  chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
+  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime }, viewBookmarks);
 };
 
 const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
@@ -89,4 +66,23 @@ const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
   controlParentElement.appendChild(controlElement);
 };
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const activeTab = await getActiveTabURL();
+  const queryParameters = activeTab.url.split("?")[1];
+  const urlParameters = new URLSearchParams(queryParameters);
+
+  currentVideo = urlParameters.get("v");
+
+  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+    chrome.storage.sync.get([currentVideo], (data) => {
+      currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+
+      viewBookmarks(currentVideoBookmarks);
+    });
+  } else {
+    const container = document.getElementsByClassName("container")[0];
+
+    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
+  }
+});
 

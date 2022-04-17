@@ -46,7 +46,7 @@
     }
   };
 
-  chrome.runtime.onMessage.addListener(obj => {
+  chrome.runtime.onMessage.addListener(async (obj, sender, response) => {
     const { type, value, videoId } = obj;
 
     if (type === "NEW") {
@@ -56,6 +56,9 @@
       youtubePlayer.currentTime = value;
     } else if ( type === "DELETE") {
       currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time != value);
+      chrome.storage.sync.set({ [currentVideo]: JSON.stringify(currentVideoBookmarks) });
+
+      response(currentVideoBookmarks);
     }
   });
 })();
