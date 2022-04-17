@@ -1,7 +1,7 @@
 import { getActiveTabURL, sendMessage } from "./utils.js";
 
 let currentVideo;
-let current = [];
+let currentVideoBookmarks = [];
 
 const addNewBookmark = (bookmarks, bookmark) => {
   const bookmarkTitleElement = document.createElement("div");
@@ -38,14 +38,14 @@ const viewBookmarks = (currentBookmarks=[]) => {
   }
 };
 
-const onPlay = async (e) => {
+const onPlay = async e => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
   sendMessage({ tabId: activeTab.id, type: "PLAY", value: bookmarkTime });
 };
 
-const onDelete = async (e) => {
+const onDelete = async e => {
   const activeTab = await getActiveTabURL();
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const bookmarkElementToDelete = document.getElementById(
@@ -54,21 +54,16 @@ const onDelete = async (e) => {
 
   bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 
-  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime });
-
-  current = current.filter((b) => b.time != bookmarkTime);
-  chrome.storage.sync.set({ [currentVideo]: JSON.stringify(current) });
+  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime }, viewBookmarks);
 };
 
-const setBookmarkAttributes =  (src, eventlistener, controlParentElement) => {
+const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
   const controlElement = document.createElement("img");
 
   controlElement.src = "assets/" + src + ".png";
   controlElement.title = src;
-  controlElement.addEventListener("click", eventlistener);
+  controlElement.addEventListener("click", eventListener);
   controlParentElement.appendChild(controlElement);
-
-  return controlElement;
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -80,9 +75,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
     chrome.storage.sync.get([currentVideo], (data) => {
-      current = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+      currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
 
-      viewBookmarks(current);
+      viewBookmarks(currentVideoBookmarks);
     });
   } else {
     const container = document.getElementsByClassName("container")[0];
