@@ -54,7 +54,7 @@ const onDelete = async e => {
 
   bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 
-  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime }, viewBookmarks);
+  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime, callback: viewBookmarks});
 };
 
 const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {

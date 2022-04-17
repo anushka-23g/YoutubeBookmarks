@@ -7,9 +7,9 @@ export async function getActiveTabURL() {
     return tabs[0];
 }
 
-export function sendMessage({tabId, type, value}) {
+export function sendMessage({tabId, type, value, callback}) {
     chrome.tabs.sendMessage(tabId, {
         type,
         value
-    });
+    }, callback);
 }
