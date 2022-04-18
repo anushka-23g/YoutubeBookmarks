@@ -26,10 +26,9 @@
   };
 
   const newVideoLoaded = async () => {
-    const bookmarks = await fetchBookmarks();
     const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
 
-    currentVideoBookmarks = bookmarks;
+    currentVideoBookmarks = await fetchBookmarks();
 
     if (!bookmarkBtnExists) {
       const bookmarkBtn = document.createElement("img");
@@ -46,7 +45,7 @@
     }
   };
 
-  chrome.runtime.onMessage.addListener(async (obj, sender, response) => {
+  chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, value, videoId } = obj;
 
     if (type === "NEW") {
