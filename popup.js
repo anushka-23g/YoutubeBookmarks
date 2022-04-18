@@ -36,6 +36,8 @@ const viewBookmarks = (currentBookmarks=[]) => {
   } else {
     bookmarksElement.innerHTML = '<i class="row">No bookmarks to show</i>';
   }
+
+  return;
 };
 
 const onPlay = async e => {
