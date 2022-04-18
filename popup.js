@@ -1,4 +1,4 @@
-import { getActiveTabURL, sendMessage } from "./utils.js";
+import { getActiveTabURL } from "./utils.js";
 
 let currentVideo;
 let currentVideoBookmarks = [];
@@ -44,7 +44,10 @@ const onPlay = async e => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
-  sendMessage({ tabId: activeTab.id, type: "PLAY", value: bookmarkTime });
+  chrome.tabs.sendMessage(activeTab.id, {
+    type: "PLAY",
+    videoId: bookmarkTime,
+  });
 };
 
 const onDelete = async e => {
@@ -56,7 +59,10 @@ const onDelete = async e => {
 
   bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
 
-  sendMessage({ tabId: activeTab.id, type: "DELETE", value: bookmarkTime, callback: viewBookmarks});
+  chrome.tabs.sendMessage(activeTab.id, {
+    type: "DELETE",
+    value: bookmarkTime,
+  }, viewBookmarks);
 };
 
 const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
