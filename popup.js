@@ -46,7 +46,7 @@ const onPlay = async e => {
 
   chrome.tabs.sendMessage(activeTab.id, {
     type: "PLAY",
-    videoId: bookmarkTime,
+    value: bookmarkTime,
   });
 };
 
