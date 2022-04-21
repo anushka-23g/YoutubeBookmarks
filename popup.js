@@ -1,8 +1,5 @@
 import { getActiveTabURL } from "./utils.js";
 
-let currentVideo;
-let currentVideoBookmarks = [];
-
 const addNewBookmark = (bookmarks, bookmark) => {
   const bookmarkTitleElement = document.createElement("div");
   const controlsElement = document.createElement("div");
@@ -79,11 +76,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const queryParameters = activeTab.url.split("?")[1];
   const urlParameters = new URLSearchParams(queryParameters);
 
-  currentVideo = urlParameters.get("v");
+  const currentVideo = urlParameters.get("v");
 
   if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
     chrome.storage.sync.get([currentVideo], (data) => {
-      currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+      const currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
 
       viewBookmarks(currentVideoBookmarks);
     });
