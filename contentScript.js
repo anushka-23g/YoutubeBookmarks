@@ -60,6 +60,8 @@
       response(currentVideoBookmarks);
     }
   });
+
+  newVideoLoaded();
 })();
 
 const getTime = t => {
